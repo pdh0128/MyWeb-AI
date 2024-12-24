@@ -39,13 +39,16 @@ def vec_store(postid, title, content):
     )
 
 def vec_search(query_text):
-    results = vector_store.similarity_search(query_text, k=3)
-
+    query_vecter = embeddings.embed_query(query_text)
+    results = pinecone_index.query(vector=query_vecter, top_k=3, include_metadata=True)
     metasets = []
-    if results:
+    if "matches" in results:
         print(results)
-        for match in results:
-            metasets.append(int(match.metadata['postid']))
+        for match in results['matches']:
+            if match['score'] > 0.75:
+                metasets.append(int(match['id']))
+    print(query_text)
+    print(metasets)
     return metasets
 
 def vec_delete(postid):
